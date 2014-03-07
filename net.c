@@ -45,50 +45,48 @@
  * Create nonblocking connections(pipes) between manager and hosts  
  * assuming host physical IDs are 0, 1, ....
  */
-void netCreateConnections(manLinkArrayType * manLinkArray) 
-{
-int i;
-int pflag;
+void netCreateConnections(manLinkArrayType * manLinkArray) {
+   int i;
+   int pflag;
 
-for (i=0; i<manLinkArray->numlinks; i++) {
-   if (pipe(manLinkArray->link[i].toHost) < 0) {
-      printf("Creating pipe failed\n");
-      return;
+   for (i=0; i<manLinkArray->numlinks; i++) {
+      if (pipe(manLinkArray->link[i].toHost) < 0) {
+         printf("Creating pipe failed\n");
+         return;
+      }
+      if (pipe(manLinkArray->link[i].fromHost) < 0) {
+         printf("Creating pipe failed\n");
+         return;
+      }
+
+      /* Set the pipes to nonblocking */
+      pflag = fcntl(manLinkArray->link[i].toHost[0],F_GETFL);
+      fcntl(manLinkArray->link[i].toHost[0],F_SETFL, pflag | O_NONBLOCK);
+
+      pflag = fcntl(manLinkArray->link[i].toHost[1],F_GETFL);
+      fcntl(manLinkArray->link[i].toHost[1],F_SETFL, pflag | O_NONBLOCK);
+
+      pflag = fcntl(manLinkArray->link[i].fromHost[0],F_GETFL);
+      fcntl(manLinkArray->link[i].fromHost[0],F_SETFL, pflag | O_NONBLOCK);
+
+      pflag = fcntl(manLinkArray->link[i].fromHost[1],F_GETFL);
+      fcntl(manLinkArray->link[i].fromHost[1],F_SETFL, pflag | O_NONBLOCK);
    }
-   if (pipe(manLinkArray->link[i].fromHost) < 0) {
-      printf("Creating pipe failed\n");
-      return;
-   }
-
-   /* Set the pipes to nonblocking */
-   pflag = fcntl(manLinkArray->link[i].toHost[0],F_GETFL);
-   fcntl(manLinkArray->link[i].toHost[0],F_SETFL, pflag | O_NONBLOCK);
-
-   pflag = fcntl(manLinkArray->link[i].toHost[1],F_GETFL);
-   fcntl(manLinkArray->link[i].toHost[1],F_SETFL, pflag | O_NONBLOCK);
-
-   pflag = fcntl(manLinkArray->link[i].fromHost[0],F_GETFL);
-   fcntl(manLinkArray->link[i].fromHost[0],F_SETFL, pflag | O_NONBLOCK);
-
-   pflag = fcntl(manLinkArray->link[i].fromHost[1],F_GETFL);
-   fcntl(manLinkArray->link[i].fromHost[1],F_SETFL, pflag | O_NONBLOCK);
-}
 }
 
 /* 
  * Creates links to be used between nodes but does not set the
  * end nodes of the links
  */
-void netCreateLinks(linkArrayType * linkArray)
-{ 
-int i;
+void netCreateLinks(linkArrayType * linkArray) { 
+   int i;
 
-for (i=0; i<linkArray->numlinks; i++) { 
-   linkArray->link[i].linkID = i;
-   linkArray->link[i].linkType = UNIPIPE;
-   linkArray->link[i].uniPipeInfo.pipeType = NONBLOCKING;
-   linkCreate(&(linkArray->link[i]));
-}
+   for (i=0; i<linkArray->numlinks; i++) { 
+      linkArray->link[i].linkID = i;
+      linkArray->link[i].linkType = UNIPIPE;
+      linkArray->link[i].uniPipeInfo.pipeType = NONBLOCKING;
+      linkCreate(&(linkArray->link[i]));
+   }
 }
 
 /* 
@@ -96,79 +94,121 @@ for (i=0; i<linkArray->numlinks; i++) {
  * the host to manager and the incoming connection from
  * the manager to host.
  */
-void netCloseConnections(manLinkArrayType *  manLinkArray, int hostid)
-{
-int i;
+void netCloseConnections(manLinkArrayType *  manLinkArray, int hostid) {
+   int i;
 
-/* Close all connections not incident to the host */
-for (i=0; i<manLinkArray->numlinks; i++) {
-   if (i != hostid) { 
-      close(manLinkArray->link[i].toHost[0]);
-      close(manLinkArray->link[i].toHost[1]);
-      close(manLinkArray->link[i].fromHost[0]);
-      close(manLinkArray->link[i].fromHost[1]);
+   /* Close all connections not incident to the host */
+   for (i=0; i<manLinkArray->numlinks; i++) {
+      if (i != hostid) { 
+         close(manLinkArray->link[i].toHost[0]);
+         close(manLinkArray->link[i].toHost[1]);
+         close(manLinkArray->link[i].fromHost[0]);
+         close(manLinkArray->link[i].fromHost[1]);
+      }
    }
-}
 
-/* Close manager's side of the connection from host to manager */
-close(manLinkArray->link[hostid].fromHost[PIPEREAD]);
+   /* Close manager's side of the connection from host to manager */
+   close(manLinkArray->link[hostid].fromHost[PIPEREAD]);
 
-/* Close manager's side of the connection from manager to host */
-close(manLinkArray->link[hostid].toHost[PIPEWRITE]);
+   /* Close manager's side of the connection from manager to host */
+   close(manLinkArray->link[hostid].toHost[PIPEWRITE]);
 }
 
 /*
  * Sets the end nodes of the links.  In this case there is
  * just two links between two hosts
  */
+void netSetNetworkTopology(linkArrayType * linkArray){
 
-void netSetNetworkTopology(linkArrayType * linkArray)
-{
-linkArray->link[0].uniPipeInfo.physIdSrc = 0;
-linkArray->link[0].uniPipeInfo.physIdDst = 1;
-linkArray->link[1].uniPipeInfo.physIdSrc = 1;
-linkArray->link[1].uniPipeInfo.physIdDst = 0;
+/* host - host 
+      0      1
+ */
+   linkArray->link[0].uniPipeInfo.physIdSrc = 0;
+   linkArray->link[0].uniPipeInfo.portIdSrc = 0;
+   linkArray->link[0].uniPipeInfo.physIdDst = 1;
+   linkArray->link[0].uniPipeInfo.portIdDst = 0;
+
+   linkArray->link[1].uniPipeInfo.physIdSrc = 1;
+   linkArray->link[1].uniPipeInfo.portIdSrc = 0;
+   linkArray->link[1].uniPipeInfo.physIdDst = 0;
+   linkArray->link[1].uniPipeInfo.portIdDst = 0;
+
+/* host - switch - host
+      0        2      1
+ * 
+   linkArray->link[0].uniPipeInfo.physIdSrc = 0;
+   linkArray->link[0].uniPipeInfo.portIdSrc = 0;
+   linkArray->link[0].uniPipeInfo.physIdDst = 2;
+   linkArray->link[0].uniPipeInfo.portIdDst = 0;
+  
+   linkArray->link[1].uniPipeInfo.physIdSrc = 1;
+   linkArray->link[1].uniPipeInfo.portIdSrc = 0;
+   linkArray->link[1].uniPipeInfo.physIdDst = 2;
+   linkArray->link[1].uniPipeInfo.portIdDst = 1;
+  
+   linkArray->link[2].uniPipeInfo.physIdSrc = 2;
+   linkArray->link[2].uniPipeInfo.portIdSrc = 0;
+   linkArray->link[2].uniPipeInfo.physIdDst = 0;
+   linkArray->link[2].uniPipeInfo.portIdDst = 0;
+  
+   linkArray->link[3].uniPipeInfo.physIdSrc = 2;
+   linkArray->link[3].uniPipeInfo.portIdSrc = 1;
+   linkArray->link[3].uniPipeInfo.physIdDst = 1;
+   linkArray->link[3].uniPipeInfo,portIdDst = 0;
+ */
 }
 
 /*
  * Find host's outgoing link and return its index
- * from the link array
+ * from the link array.
+ *
+ * netHostOutLink & netHostInLink do not require
+ * any changes. Regardless of the port number,
+ * the following functions will always link to the
+ * corrent pipe.
+ *
+ * netSwitchOutLink & netSwitchInlink will be required
+ * to trace the port number of the connection!
  */
-int netHostOutLink(linkArrayType * linkArray, int hostid) 
-{
-int i;
-int index;
+int netHostOutLink(linkArrayType * linkArray, int hostid) {
+   int i;
+   int index;
 
-index = linkArray->numlinks;
+   index = linkArray->numlinks;
 
-for (i=0; i<linkArray->numlinks; i++) {
-   /* Store index if the outgoing link is found */
-   if (linkArray->link[i].uniPipeInfo.physIdSrc == hostid) 
-      index = i;
-}
-if (index == linkArray->numlinks) 
-   printf("Error:  Can't find outgoing link for host\n");
-return index; 
+   for (i=0; i<linkArray->numlinks; i++) {
+      /* Store index if the outgoing link is found */
+      if (linkArray->link[i].uniPipeInfo.physIdSrc == hostid) 
+         index = i;
+   } if (index == linkArray->numlinks) 
+      printf("Error:  Can't find outgoing link for host\n");
+   return index; 
 }
 
 /*
  * Find host's incoming link and return its index
  * from the link array
  */
-int netHostInLink(linkArrayType * linkArray, int hostid) 
-{
-int i;
-int index;
+int netHostInLink(linkArrayType * linkArray, int hostid) {
+   int i;
+   int index;
 
-index = linkArray->numlinks;
+   index = linkArray->numlinks;
 
-for (i=0; i<linkArray->numlinks; i++) {
-   /* Store index if the outgoing link is found */
-   if (linkArray->link[i].uniPipeInfo.physIdDst == hostid) index = i;
+   for (i=0; i<linkArray->numlinks; i++) {
+      /* Store index if the outgoing link is found */
+      if (linkArray->link[i].uniPipeInfo.physIdDst == hostid) index = i;
+   } if (index == linkArray->numlinks) 
+      printf("Error:  Can't find outgoing link for host\n");
+   return index; 
 }
-if (index == linkArray->numlinks) 
-   printf("Error:  Can't find outgoing link for host\n");
-return index; 
+
+int netSwitchOutLink(linkArrayType * linkArray, int switchid) {
+   /* will these functions be needed? */  
+}
+
+int netSwitchInLink(linkArrayType * linkArray, int switchid) {
+   /* will these functions be needed? */
 }
 
 /*

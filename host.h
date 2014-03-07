@@ -6,6 +6,7 @@
 
 typedef struct {                  /* State of host */
    int   physid;                  /* physical id */
+   int   portid;                  /* port id */
    char  maindir[NAME_LENGTH];    /* main directory name */
    int   maindirvalid;            /* indicates if the main directory is empty */
    int   netaddr;                 /* host's network address */

@@ -86,6 +86,8 @@ for (physid = 0; physid < NUMHOSTS; physid++) {
    }  
 }
 
+/* Switch */
+
 /* Manager */
 
 /* 

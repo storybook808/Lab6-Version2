@@ -13,7 +13,9 @@ typedef struct {
    enum UniPipeType pipeType;
    int         fd[2];
    int         physIdSrc;
+   int         portIdSrc;
    int	       physIdDst;
+   int         portIdDst;
 } UniPipeInfo;
 
 typedef struct {  /* Has all the information to implement a link */

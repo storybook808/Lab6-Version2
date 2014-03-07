@@ -471,14 +471,14 @@ appendWithSpace(replymsg, word);
 /* 
  * Initialize the state of the host 
  */
-void hostInitState(hostState * hstate, int physid)
-{
-hstate->physid = physid;
-hstate->maindirvalid = 0; /* main directory name is empty*/
-hstate->netaddr = physid; /* default address */  
-hstate->nbraddr = EMPTY_ADDR;  
-hstate->rcvPacketBuff.valid = 0;
-hstate->rcvPacketBuff.new = 0;
+void hostInitState(hostState * hstate, int physid) {
+   hstate->physid = physid;
+   hstate->portid = 0;       /* this version of host will only have one port */
+   hstate->maindirvalid = 0; /* main directory name is empty*/
+   hstate->netaddr = physid; /* default address */  
+   hstate->nbraddr = EMPTY_ADDR;  
+   hstate->rcvPacketBuff.valid = 0;
+   hstate->rcvPacketBuff.new = 0;
 }
 
 
