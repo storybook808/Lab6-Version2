@@ -39,6 +39,8 @@
 #define PIPEREAD  0
 #define TENMILLISEC 10000   /* 10 millisecond sleep */
 
+#define debug
+
 /* 
  * switchInit initializes the switch.  It calls
  * - switchInitState which initializes the host's state.
@@ -80,27 +82,38 @@ void switchMain(switchState * sstate)
       forwardTable[i] = -1;
 
    while(1) {
-      for (i=0; i<MAXPORT; i++) {
+      for (i=0; i<MAXPORT; i++) 
+      {
          linkReceive(&(sstate->linkin[i]), &tmpbuff[i]);
-         if (tmpbuff[i].valid == 1 && tmpbuff[i].new == 1) {
+	 if (tmpbuff[i].valid == 1 && tmpbuff[i].new == 1) 
+	 {
 	    forwardTable[i] = tmpbuff[i].srcaddr;
 	    
 	    /* target is empty */
 	    target = -1;
-	    for (j=0; j<MAXPORT; j++) {
-               if (forwardTable[j] == tmpbuff[i].dstaddr) {
+	    for (j=0; j<MAXPORT; j++) 
+	    {
+               if (forwardTable[j] == tmpbuff[i].dstaddr) 
+	       {
                   target = j;
 	       }
-	    } if (target != -1) {
+	    } 
+	    if (target != -1) 
+	    {
                linkSend(&(sstate->linkout[target]), &tmpbuff[i]);
-	    } else {
-               for (j=0; j<MAXPORT; j++) {
+	    } 
+	    else 
+	    {
+               for (j=0; j<MAXPORT; j++) 
+	       {
                   linkSend(&(sstate->linkout[j]), &tmpbuff[i]);
+		  usleep(TENMILLISEC);
 	       }
 	    }
          }
 	 usleep(TENMILLISEC);
       }
+      usleep(TENMILLISEC);
    } /* End of while loop */
 }
 

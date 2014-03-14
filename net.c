@@ -137,7 +137,7 @@ void netSetNetworkTopology(linkArrayType * linkArray){
 
 /* host - switch - host
       0        2      1
- */ 
+ */
    linkArray->link[0].uniPipeInfo.physIdSrc = 0;
    linkArray->link[0].uniPipeInfo.portIdSrc = 0;
    linkArray->link[0].uniPipeInfo.physIdDst = 2;
@@ -157,7 +157,7 @@ void netSetNetworkTopology(linkArrayType * linkArray){
    linkArray->link[3].uniPipeInfo.portIdSrc = 1;
    linkArray->link[3].uniPipeInfo.physIdDst = 1;
    linkArray->link[3].uniPipeInfo.portIdDst = 0;
-// */
+ //*/
 }
 
 /*
@@ -209,12 +209,13 @@ int netHostInLink(linkArrayType * linkArray, int hostid) {
 void netSwitchOutLink(linkArrayType * linkArray, switchState * sstate) {
    int i;
    int j;
-
+   
    for (i=0; i<linkArray->numlinks; i++) {
       if (linkArray->link[i].uniPipeInfo.physIdSrc == sstate->physid)
-         for (j=0; j<MAXPORT; j++)
-            if (linkArray->link[i].uniPipeInfo.portIdSrc == sstate->linkout[j].uniPipeInfo.portIdSrc)
-	       sstate->linkout[j] = linkArray->link[i];
+         //for (j=0; j<MAXPORT; j++)
+            //if (linkArray->link[i].uniPipeInfo.portIdSrc == sstate->linkout[j].uniPipeInfo.portIdSrc)
+	       sstate->linkout[linkArray->link[i].uniPipeInfo.portIdSrc] = linkArray->link[i];
+	       // was linkout[j]
    }
 }
 
@@ -224,9 +225,9 @@ void netSwitchInLink(linkArrayType * linkArray, switchState * sstate) {
 
    for (i=0; i<linkArray->numlinks; i++) {
       if(linkArray->link[i].uniPipeInfo.physIdDst == sstate->physid)
-         for (j=0; j<MAXPORT; j++)
-	    if (linkArray->link[i].uniPipeInfo.portIdDst == sstate->linkin[j].uniPipeInfo.portIdDst)
-	       sstate->linkin[j] = linkArray->link[i];
+         //for (j=0; j<MAXPORT; j++)
+	    //if (linkArray->link[i].uniPipeInfo.portIdDst == sstate->linkin[j].uniPipeInfo.portIdDst)
+	       sstate->linkin[linkArray->link[i].uniPipeInfo.portIdDst] = linkArray->link[i];
    }
 }
 

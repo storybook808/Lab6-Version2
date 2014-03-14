@@ -3,7 +3,7 @@
  */
 
 #define NUMSWITCH 1
-#define MAXPORT 100 
+#define MAXPORT 5
 
 typedef struct {                  /* State of host */
    int   physid;                  /* physical id */
