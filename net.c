@@ -34,6 +34,7 @@
 #include "link.h"
 #include "man.h"
 #include "host.h"
+#include "switch.h"
 
 #define EMPTY_ADDR  0xffff  /* Indicates that the empty address */
                              /* It also indicates that the broadcast address */
@@ -122,7 +123,7 @@ void netSetNetworkTopology(linkArrayType * linkArray){
 
 /* host - host 
       0      1
- */
+ *
    linkArray->link[0].uniPipeInfo.physIdSrc = 0;
    linkArray->link[0].uniPipeInfo.portIdSrc = 0;
    linkArray->link[0].uniPipeInfo.physIdDst = 1;
@@ -132,10 +133,11 @@ void netSetNetworkTopology(linkArrayType * linkArray){
    linkArray->link[1].uniPipeInfo.portIdSrc = 0;
    linkArray->link[1].uniPipeInfo.physIdDst = 0;
    linkArray->link[1].uniPipeInfo.portIdDst = 0;
+ */
 
 /* host - switch - host
       0        2      1
- * 
+ */ 
    linkArray->link[0].uniPipeInfo.physIdSrc = 0;
    linkArray->link[0].uniPipeInfo.portIdSrc = 0;
    linkArray->link[0].uniPipeInfo.physIdDst = 2;
@@ -154,8 +156,8 @@ void netSetNetworkTopology(linkArrayType * linkArray){
    linkArray->link[3].uniPipeInfo.physIdSrc = 2;
    linkArray->link[3].uniPipeInfo.portIdSrc = 1;
    linkArray->link[3].uniPipeInfo.physIdDst = 1;
-   linkArray->link[3].uniPipeInfo,portIdDst = 0;
- */
+   linkArray->link[3].uniPipeInfo.portIdDst = 0;
+// */
 }
 
 /*
@@ -196,34 +198,61 @@ int netHostInLink(linkArrayType * linkArray, int hostid) {
    index = linkArray->numlinks;
 
    for (i=0; i<linkArray->numlinks; i++) {
-      /* Store index if the outgoing link is found */
-      if (linkArray->link[i].uniPipeInfo.physIdDst == hostid) index = i;
+      /* Store index if the incoming link is found */
+      if (linkArray->link[i].uniPipeInfo.physIdDst == hostid) 
+         index = i;
    } if (index == linkArray->numlinks) 
-      printf("Error:  Can't find outgoing link for host\n");
+      printf("Error:  Can't find incoming link for host %d\n", hostid);
    return index; 
 }
 
-int netSwitchOutLink(linkArrayType * linkArray, int switchid) {
-   /* will these functions be needed? */  
+void netSwitchOutLink(linkArrayType * linkArray, switchState * sstate) {
+   int i;
+   int j;
+
+   for (i=0; i<linkArray->numlinks; i++) {
+      if (linkArray->link[i].uniPipeInfo.physIdSrc == sstate->physid)
+         for (j=0; j<MAXPORT; j++)
+            if (linkArray->link[i].uniPipeInfo.portIdSrc == sstate->linkout[j].uniPipeInfo.portIdSrc)
+	       sstate->linkout[j] = linkArray->link[i];
+   }
 }
 
-int netSwitchInLink(linkArrayType * linkArray, int switchid) {
-   /* will these functions be needed? */
+void netSwitchInLink(linkArrayType * linkArray, switchState * sstate) {
+   int i;
+   int j;
+
+   for (i=0; i<linkArray->numlinks; i++) {
+      if(linkArray->link[i].uniPipeInfo.physIdDst == sstate->physid)
+         for (j=0; j<MAXPORT; j++)
+	    if (linkArray->link[i].uniPipeInfo.portIdDst == sstate->linkin[j].uniPipeInfo.portIdDst)
+	       sstate->linkin[j] = linkArray->link[i];
+   }
 }
 
 /*
  * Close links not connected to the host
  */
-void netCloseHostOtherLinks(linkArrayType * linkArray, int hostid)
-{
-int i;
+void netCloseHostOtherLinks(linkArrayType * linkArray, int hostid) {
+   int i;
 
-for (i=0; i<linkArray->numlinks; i++) {
-   if (linkArray->link[i].uniPipeInfo.physIdSrc != hostid) 
-      close(linkArray->link[i].uniPipeInfo.fd[PIPEWRITE]);
-   if (linkArray->link[i].uniPipeInfo.physIdDst != hostid) 
-      close(linkArray->link[i].uniPipeInfo.fd[PIPEREAD]);
+   for (i=0; i<linkArray->numlinks; i++) {
+      if (linkArray->link[i].uniPipeInfo.physIdSrc != hostid) 
+         close(linkArray->link[i].uniPipeInfo.fd[PIPEWRITE]);
+      if (linkArray->link[i].uniPipeInfo.physIdDst != hostid) 
+         close(linkArray->link[i].uniPipeInfo.fd[PIPEREAD]);
+   }
 }
+
+void netCloseSwitchOtherLinks(linkArrayType * linkArray, int switchid) {
+   int i;
+   
+   for (i=0; i<linkArray->numlinks; i++) {
+      if (linkArray->link[i].uniPipeInfo.physIdSrc != switchid) 
+         close(linkArray->link[i].uniPipeInfo.fd[PIPEWRITE]);
+      if (linkArray->link[i].uniPipeInfo.physIdDst != switchid)
+         close(linkArray->link[i].uniPipeInfo.fd[PIPEREAD]);
+   }
 }
 
 /* Close all links*/
@@ -239,12 +268,12 @@ for (i=0; i<linkArray->numlinks; i++)
 /* Close the host's side of a connection between a host and manager */
 void netCloseManConnections(manLinkArrayType * manLinkArray)
 {
-int i;
+   int i;
 
-for (i=0; i<manLinkArray->numlinks; i++) {
-   close(manLinkArray->link[i].toHost[PIPEREAD]);
-   close(manLinkArray->link[i].fromHost[PIPEWRITE]);
-}
+   for (i=0; i<manLinkArray->numlinks; i++) {
+      close(manLinkArray->link[i].toHost[PIPEREAD]);
+      close(manLinkArray->link[i].fromHost[PIPEWRITE]);
+   }
 }
 
 
