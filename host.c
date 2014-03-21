@@ -321,13 +321,13 @@ if (fp == NULL) { /* file didn't open */
    return;
 }
 
-length = fread(tempbuff, 1, PAYLOAD_LENGTH+1, fp);
+length = fread(tempbuff, 1, MAX_PAYLOAD+1, fp);
 
 if (length==0) {
    strcpy(replymsg, "Upload aborted: error in reading the file");
    return;
 }
-else if (length > PAYLOAD_LENGTH) {
+else if (length > MAX_PAYLOAD) {
    strcpy(replymsg, "Upload aborted: file is too big");
    return;
 }

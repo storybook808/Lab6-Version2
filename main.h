@@ -1,5 +1,6 @@
 
-#define PAYLOAD_LENGTH 200 /* Maximum payload size */
+#define PAYLOAD_LENGTH 210 /* Maximum payload size */
+#define MAX_PAYLOAD 2000
 
 typedef struct { /* Packet buffer */
    int srcaddr;  /* Source address */
