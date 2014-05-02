@@ -12,7 +12,8 @@ typedef struct {                  /* State of host */
    int   nbraddr;                 /* network address of neighbor */
    int   rcvflag;
    packetBuffer sendPacketBuff;   /* send packet buffer */
-   packetBuffer rcvPacketBuff;   
+   packetBuffer rcvPacketBuff;
+   //localBuffer  sendLocalBuff;
    managerLink manLink;           /* Connection to the manager */
    LinkInfo linkin;               /* Incoming communication link */
    LinkInfo linkout;              /* Outgoing communication link */

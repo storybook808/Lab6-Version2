@@ -40,6 +40,7 @@ void switchInitState(switchState * sstate, int physid);
  */
 void switchMain(switchState * sstate)
 {
+   int size;
    int  i;
    int  j;
    int  target;
@@ -47,18 +48,20 @@ void switchMain(switchState * sstate)
    packetBuffer tmpbuff[MAXPORT];
 
    /* Clear Forwarding Table */
-   for (i=0; i<MAXPORT; i++)
+   for (i=0; i<MAXPORT; i++){
       forwardTable[i] = -1;
+      tmpbuff[i].valid = 0;
+      tmpbuff[i].new = 0;
+   }
 
    while(1) {
       
       /* Scroll through the different ports scanning for a new packet. */
       for (i=0; i<MAXPORT; i++) {
-         linkReceive(&(sstate->linkin[i]), &tmpbuff[i]);
-
+         size = linkReceive(&(sstate->linkin[i]), &tmpbuff[i]);
 	 /* New packet detected. */
 	 if (tmpbuff[i].valid == 1 && tmpbuff[i].new == 1) {
-
+            printf("SIZE: %d\n", size);
 	    /* Save address onto forwarding table. */
 	    forwardTable[i] = tmpbuff[i].srcaddr;
 	    
@@ -73,7 +76,7 @@ void switchMain(switchState * sstate)
                   target = j;
 	       }
 	    } 
-
+            printf("END %d\n",i);
 	    /* When target was found, transmit to correct port. */
 	    if (target != -1) {
                linkSend(&(sstate->linkout[target]), &tmpbuff[i]);
@@ -89,6 +92,9 @@ void switchMain(switchState * sstate)
 		  usleep(TENMILLISEC);
 	       }
 	    }
+	    /* Message reset. */
+	    tmpbuff[i].valid = 0;
+	    tmpbuff[i].new = 0;
          }
 	 /* Sleep in between each linkreceive. */
 	 usleep(TENMILLISEC);
