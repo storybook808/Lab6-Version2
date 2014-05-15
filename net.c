@@ -157,7 +157,49 @@ void netSetNetworkTopology(linkArrayType * linkArray){
    linkArray->link[3].uniPipeInfo.portIdSrc = 1;
    linkArray->link[3].uniPipeInfo.physIdDst = 1;
    linkArray->link[3].uniPipeInfo.portIdDst = 0;
- //*/
+
+   linkArray->link[4].uniPipeInfo.physIdSrc = 2;
+   linkArray->link[4].uniPipeInfo.portIdSrc = 2;
+   linkArray->link[4].uniPipeInfo.physIdDst = 3;
+   linkArray->link[4].uniPipeInfo.portIdDst = 0;
+
+   linkArray->link[5].uniPipeInfo.physIdSrc = 3;
+   linkArray->link[5].uniPipeInfo.portIdSrc = 0;
+   linkArray->link[5].uniPipeInfo.physIdDst = 2;
+   linkArray->link[5].uniPipeInfo.portIdDst = 2;
+
+   linkArray->link[6].uniPipeInfo.physIdSrc = 2;
+   linkArray->link[6].uniPipeInfo.portIdSrc = 3;
+   linkArray->link[6].uniPipeInfo.physIdDst = 4;
+   linkArray->link[6].uniPipeInfo.portIdDst = 0;
+
+   linkArray->link[7].uniPipeInfo.physIdSrc = 4;
+   linkArray->link[7].uniPipeInfo.portIdSrc = 0;
+   linkArray->link[7].uniPipeInfo.physIdDst = 2;
+   linkArray->link[7].uniPipeInfo.portIdDst = 3;
+
+   linkArray->link[8].uniPipeInfo.physIdSrc = 2;
+   linkArray->link[8].uniPipeInfo.portIdSrc = 4;
+   linkArray->link[8].uniPipeInfo.physIdDst = 5;
+   linkArray->link[8].uniPipeInfo.portIdDst = 2;
+
+   linkArray->link[9].uniPipeInfo.physIdSrc = 5;
+   linkArray->link[9].uniPipeInfo.portIdSrc = 2;
+   linkArray->link[9].uniPipeInfo.physIdDst = 2;
+   linkArray->link[9].uniPipeInfo.portIdDst = 4;
+
+   linkArray->link[10].uniPipeInfo.physIdSrc = 3;
+   linkArray->link[10].uniPipeInfo.portIdSrc = 1;
+   linkArray->link[10].uniPipeInfo.physIdDst = 5;
+   linkArray->link[10].uniPipeInfo.portIdDst = 1;
+
+   linkArray->link[11].uniPipeInfo.physIdSrc = 5;
+   linkArray->link[11].uniPipeInfo.portIdSrc = 1;
+   linkArray->link[11].uniPipeInfo.physIdDst = 3;
+   linkArray->link[11].uniPipeInfo.portIdDst = 1;
+
+
+//*/
 }
 
 /*

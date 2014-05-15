@@ -46,6 +46,7 @@ void switchMain(switchState * sstate)
    int  target;
    int  forwardTable[MAXPORT];
    packetBuffer tmpbuff[MAXPORT];
+   networkInfo A;
 
    /* Clear Forwarding Table */
    for (i=0; i<MAXPORT; i++){
@@ -54,6 +55,10 @@ void switchMain(switchState * sstate)
       tmpbuff[i].new = 0;
    }
 
+   A.leader = sstate->physid;
+   A.distance = 0;
+   A.parent = -1;
+
    while(1) {
       
       /* Scroll through the different ports scanning for a new packet. */
@@ -61,10 +66,13 @@ void switchMain(switchState * sstate)
          size = linkReceive(&(sstate->linkin[i]), &tmpbuff[i]);
 	 /* New packet detected. */
 	 if (tmpbuff[i].valid == 1 && tmpbuff[i].new == 1) {
-            printf("SIZE: %d\n", size);
 	    /* Save address onto forwarding table. */
 	    forwardTable[i] = tmpbuff[i].srcaddr;
 	    
+	   if (tmpbuff[i].dstaddr != -2) {
+
+
+
 	    /* Initalize target to empty. */
 	    target = -1;
 
@@ -76,7 +84,6 @@ void switchMain(switchState * sstate)
                   target = j;
 	       }
 	    } 
-            printf("END %d\n",i);
 	    /* When target was found, transmit to correct port. */
 	    if (target != -1) {
                linkSend(&(sstate->linkout[target]), &tmpbuff[i]);
@@ -91,13 +98,60 @@ void switchMain(switchState * sstate)
 		  /* Sleep in between each message. */
 		  usleep(TENMILLISEC);
 	       }
+	       usleep(TENMILLISEC);
 	    }
 	    /* Message reset. */
 	    tmpbuff[i].valid = 0;
 	    tmpbuff[i].new = 0;
+
+	    }
+            
+	    else
+	    {
+	    	// if new leader is smaller than current leader
+	    	if (tmpbuff[i].length < A.leader)
+	    	{
+			// replace parent the incoming port number
+               		A.parent = i;
+
+			// update distance from root leader
+			A.distance = tmpbuff[i].type + 1;
+
+			// replace leader information
+			A.leader = tmpbuff[i].length;
+	       	}
+
+		// if leader are the same, and this node isn't the leader
+               	/*
+		else if (tmpbuff[i].length == A.leader && A.leader != sstate->physid)
+	       	{
+			// and distance to the leader is smaller than current path
+	         	if(tmpbuff[i].type + 1 < A.distance)
+		  	{
+                     		A.parent = i;
+		     		A.distance = tmpbuff[i].type + 1;
+		  	}
+	       	}
+		*/
+	    	tmpbuff[i].valid = 0;
+	    	tmpbuff[i].new = 0;
+	    }
          }
-	 /* Sleep in between each linkreceive. */
-	 usleep(TENMILLISEC);
+
+	 tmpbuff[0].dstaddr = -2;
+	 tmpbuff[0].srcaddr = -2;
+	 tmpbuff[0].length = A.leader;
+         tmpbuff[0].type = A.distance;
+	 tmpbuff[0].payload[0] = '\0';
+	 tmpbuff[0].valid = 1;
+         for(j=0; j<MAXPORT; j++)
+	 {
+            linkSend(&(sstate->linkout[j]), &tmpbuff[0]);
+	    usleep(TENMILLISEC);
+         }
+         tmpbuff[0].valid = 0;
+printf("ID: %d Leader: %d Distance: %d Parent: %d\n\n\n", sstate->physid, A.leader, A.distance, A.parent);
+
       } /* End of for-loop. */
    } /* End of while-loop. */
 }

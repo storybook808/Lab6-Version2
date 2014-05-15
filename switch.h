@@ -2,7 +2,7 @@
  * switch.h 
  */
 
-#define NUMSWITCH 1
+#define NUMSWITCH 4
 #define MAXPORT 5
 
 typedef struct {              /* State of host. */
@@ -10,6 +10,13 @@ typedef struct {              /* State of host. */
    LinkInfo linkin[MAXPORT];  /* Incoming communication link. */
    LinkInfo linkout[MAXPORT]; /* Outgoing communication link. */
 } switchState;
+
+typedef struct
+{
+   int leader;
+   int distance;
+   int parent;
+} networkInfo;
 
 void switchMain(switchState * sstate);
 

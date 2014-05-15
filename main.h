@@ -14,6 +14,16 @@ typedef struct { /* Packet buffer */
    char test2;
    char test3;
    char test4;
+   char test5;
+   char test6;
+   char test7;
+   char test8;
+   char test9;
+   char test10;
+
+
+
+   int type;
 } packetBuffer;
 
 typedef struct {

@@ -118,10 +118,13 @@ if (link->linkType==UNIPIPE) {
       findWord(word, buffer, 2); /* Source address */
       pbuff->srcaddr = ascii2Int(word);
 
-      findWord(word, buffer, 3); /* Length */
+      findWord(word, buffer, 3); /* Length */ /* Leader */
       pbuff->length = ascii2Int(word);
 
-      findWord(word, buffer, 4); /* Payload */
+      findWord(word, buffer, 4); /* Type */ /* Distance */
+      pbuff->type = ascii2Int(word);
+
+      findWord(word, buffer, 5); /* Payload */
 
       /* 
        * We will transform the payload so that 
@@ -172,7 +175,7 @@ int linkSend(LinkInfo * link, packetBuffer * pbuff)
 
    /* Check if this send should be aborted */
    if (pbuff->valid == 0) {
-      printf("packet invalid\n");
+      //printf("packet invalid\n");
       return -1;
    }
 
@@ -196,6 +199,9 @@ int linkSend(LinkInfo * link, packetBuffer * pbuff)
    appendWithSpace(sendbuff, word);
 
    int2Ascii(word, pbuff->length);  /* Append payload length */
+   appendWithSpace(sendbuff, word);
+
+   int2Ascii(word, pbuff->type);
    appendWithSpace(sendbuff, word);
 
    /* 

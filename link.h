@@ -2,7 +2,7 @@
  */
 
 //#define NUMLINKS 2
-#define NUMLINKS 4
+#define NUMLINKS 12
 
 enum LinkType {UNIPIPE}; /* UNIPIPE = unidirectional pipe
                           * We can add more types later

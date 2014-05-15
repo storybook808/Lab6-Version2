@@ -48,6 +48,15 @@ char reverse[MAXBUFFER]; /* String to store digits in the reverse order */
 int i, j, k;
 int remainder; 
 
+if (value == -2)
+{
+   c[0] = '~';
+   c[1] = '~';
+   c[2] = '~';
+   c[3] = '\0';
+   return;
+}
+
 if (value < 0) {
    c[0] = '\0';  /* return empty character string */
    printf("Error:  negative value passed to int2Ascii\n");
@@ -78,6 +87,8 @@ int ascii2Int(char c[])
 {
 int first, last; /* position of first and last digits */
 int value;       /* value of number */
+
+if(c[0] == '~' && c[1] == '~' && c[2] == '~') return -2;
 
 /* Have first point to the first digit if it exists */
 first = 0;
