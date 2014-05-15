@@ -16,6 +16,7 @@ typedef struct
    int leader;
    int distance;
    int parent;
+   int child[MAXPORT];
 } networkInfo;
 
 void switchMain(switchState * sstate);

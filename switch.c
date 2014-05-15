@@ -53,6 +53,7 @@ void switchMain(switchState * sstate)
       forwardTable[i] = -1;
       tmpbuff[i].valid = 0;
       tmpbuff[i].new = 0;
+      A.child[i] = -1;
    }
 
    A.leader = sstate->physid;
@@ -121,6 +122,10 @@ void switchMain(switchState * sstate)
 			A.leader = tmpbuff[i].length;
 	       	}
 
+		if (tmpbuff[i].payload[0] == 'y')
+		{
+			A.child[i] = 1;
+		}
 		// if leader are the same, and this node isn't the leader
                	/*
 		else if (tmpbuff[i].length == A.leader && A.leader != sstate->physid)
@@ -142,15 +147,22 @@ void switchMain(switchState * sstate)
 	 tmpbuff[0].srcaddr = -2;
 	 tmpbuff[0].length = A.leader;
          tmpbuff[0].type = A.distance;
-	 tmpbuff[0].payload[0] = '\0';
 	 tmpbuff[0].valid = 1;
          for(j=0; j<MAXPORT; j++)
 	 {
+	    if(j == A.parent)
+	    {
+	       tmpbuff[0].payload[0] = 'y';
+	    }
+	    else
+	    {
+	       tmpbuff[0].payload[0] = 'n';
+	    }
             linkSend(&(sstate->linkout[j]), &tmpbuff[0]);
 	    usleep(TENMILLISEC);
          }
          tmpbuff[0].valid = 0;
-printf("ID: %d Leader: %d Distance: %d Parent: %d\n\n\n", sstate->physid, A.leader, A.distance, A.parent);
+printf("ID: %d Leader: %d Distance: %d Parent: %d child[0]: %d child [1]: %d\n\n\n", sstate->physid, A.leader, A.distance, A.parent, A.child[0], A.child[1]);
 
       } /* End of for-loop. */
    } /* End of while-loop. */
